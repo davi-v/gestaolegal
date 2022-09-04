@@ -1,0 +1,82 @@
+<script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+<script src="{{url_for('static',filename='js/form_utils.js')}}"></script>
+<script src="{{url_for('static',filename='js/atendidoForm_utils.js')}}"></script>
+<script>
+	trataBotaoForm();
+
+	//CHAMO AS VALIDACOES
+	validarPjConstituida();
+	validarCampoComo_conheceu("{{como_conheceu_daj['ORGAOSPUBLICOS'][1]}}");
+	validarCampoProcurou_outro_local();
+	validarRepresLegal();
+
+	//LINKO A VALIDACAO AOS CAMPOS
+	document.getElementById('pj_constituida').onchange = function() {validarPjConstituida()};
+	document.getElementById('como_conheceu').onchange = function() {validarCampoComo_conheceu("{{como_conheceu_daj['ORGAOSPUBLICOS'][1]}}")};
+	document.getElementById('procurou_outro_local').onchange = function() {validarCampoProcurou_outro_local()};
+	document.getElementById('repres_legal').onchange = function(){validarRepresLegal()};
+
+</script>
+<script>
+	$(document).ready(function($){
+		$("#formcpf").mask('000.000.000-00');
+		$("#formcpfrepr").mask('000.000.000-00');
+		$("#formcnpj").mask('00.000.000/0000-00');
+		$("#formcel").mask('(00) 00000-0000');
+		$("#formtel").mask('(00) 0000-0000');
+		//$("#formcep").mask('00000-000');
+	})
+
+	logradouro = document.getElementById('logradouro')
+	bairro = document.getElementById('bairro')
+	cidade = document.getElementById('cidade')
+	estado = document.getElementById('estado')
+
+	function limpa_formulário_cep(value)
+	{
+		logradouro.value = value
+		bairro.value = value
+		cidade.value = value
+		estado.value = value
+	}
+
+	// https://viacep.com.br/exemplo/javascript/
+	function pesquisacep(cep)
+	{
+		PESQUISANDO_STR = "Pesquisando..."
+		
+		logradouro.value = PESQUISANDO_STR
+		bairro.value = PESQUISANDO_STR
+		cidade.value = PESQUISANDO_STR
+		estado.value = PESQUISANDO_STR
+
+		var script = document.createElement('script')
+		script.src = 'https://viacep.com.br/ws/'+ cep + '/json/?callback=meu_callback'
+		document.body.appendChild(script);
+	}
+
+	function meu_callback(conteudo)
+	{
+		if (!("erro" in conteudo))
+		{
+			logradouro.value = conteudo.logradouro
+			bairro.value = conteudo.bairro
+			cidade.value = conteudo.localidade
+			estado.value = conteudo.uf
+		}
+		else
+			limpa_formulário_cep("CEP não encontrado")
+	}
+
+	document.getElementById('formcep').oninput = function()
+	{
+		this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1')
+		LEN = this.value.length
+		if (LEN > 8)
+			this.value = this.value.substr(0, 8)
+		else if (LEN == 8)
+			pesquisacep(this.value)
+		else
+			limpa_formulário_cep("Formato de CEP inválido.")
+	}
+</script>
